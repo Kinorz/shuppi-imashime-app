@@ -1,0 +1,15 @@
+# Node.js（Quasar）
+frontend/shuppi-ui/node_modules/
+frontend/shuppi-ui/.quasar/
+frontend/shuppi-ui/dist/
+frontend/shuppi-ui/.output/
+
+# .NET
+backend/ShuppiApi/bin/
+backend/ShuppiApi/obj/
+
+# OS/IDE
+.DS_Store
+*.swp
+.vscode/
+

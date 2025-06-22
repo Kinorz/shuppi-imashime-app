@@ -1,0 +1,6 @@
+@ShuppiApi_HostAddress = http://localhost:5075
+
+GET {{ShuppiApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
