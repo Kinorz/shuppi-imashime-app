@@ -1,5 +1,16 @@
 var builder = WebApplication.CreateBuilder(args);
 
+// ① CORS をサービスに追加
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:9000") // Quasar Devサーバ
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -8,13 +19,17 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+// ② 開発環境でのみ Swagger を有効にする
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// ③ CORS を有効化（UseRoutingの後、UseAuthorizationの前が基本）
 app.UseHttpsRedirection();
+app.UseCors();
 
 var summaries = new[]
 {
