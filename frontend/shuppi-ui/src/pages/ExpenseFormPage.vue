@@ -1,6 +1,11 @@
 <template>
   <q-page class="q-pa-md">
     <q-form @submit.prevent="submitExpense">
+      <DateInput
+        v-model="selectedDate"
+        label="日付"
+      />
+
       <q-select
         v-model="category"
         label="カテゴリ"
@@ -8,9 +13,11 @@
         filled
         class="q-mb-md"
       />
+
       <MoneyInput
         v-model="amount"
         label="支出"
+        class="q-mb-md"
       />
 
       <q-btn
@@ -25,15 +32,22 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import MoneyInput from '../components/forms/MoneyInput.vue';
+import DateInput from '../components/forms/DateInput.vue';
 
-const amount = ref<number | null>(null);
+const categories = ['食費', '生活費', 'その他'];
+
+const selectedDate = ref('');
 const category = ref('');
-const categories = ['食費', '交通費', '趣味', '交際費', 'その他'];
+const amount = ref<number | null>(null);
 
 function submitExpense() {
   console.log({
+    selectedDate: selectedDate,
     category: category.value,
     amount: amount.value,
   });
 }
+
+const today = new Date().toISOString().slice(0, 10); // e.g. "2025-06-29"
+selectedDate.value = today;
 </script>

@@ -7,11 +7,12 @@
       <div class="row items-center no-wrap full-width">
         <input
           :id="id"
-          :value="formattedValue"
+          v-model="inputText"
           @focus="selectOnFocus"
           @input="handleInput"
           v-money="moneyFormatForDirective"
           class="q-field__input text-right col-grow"
+          inputmode="numeric"
         />
         <span class="q-ml-sm">円</span>
       </div>
@@ -20,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue';
+import { defineProps, defineEmits, watch, ref } from 'vue';
 
 const props = defineProps<{
   modelValue: number | null;
@@ -31,6 +32,8 @@ const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void;
 }>();
 
+const inputText = ref('');
+
 const moneyFormatForDirective = {
   decimal: '.',
   thousands: ',',
@@ -40,28 +43,29 @@ const moneyFormatForDirective = {
   masked: false,
 };
 
-// フォーマット済みの文字列を表示専用として作成
-const formattedValue = computed(() => {
-  if (props.modelValue === null || isNaN(props.modelValue)) return '';
-  return props.modelValue.toLocaleString(); // 例: 123456 → "123,456"
-});
+// 外部のmodelValue → inputTextへ反映
+watch(
+  () => props.modelValue,
+  (val) => {
+    inputText.value = val !== null ? val.toLocaleString() : '';
+  },
+  { immediate: true },
+);
+
+function handleInput(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const value = input.value;
+
+  // カンマを除去して数値に変換
+  const numeric = parseInt(value.replace(/,/g, ''), 10) || 0;
+
+  emit('update:modelValue', numeric);
+}
 
 function selectOnFocus(event: FocusEvent) {
   const target = event.target as HTMLInputElement;
   setTimeout(() => {
     target.select();
   }, 5);
-}
-
-function handleInput(event: Event) {
-  const input = event.target as HTMLInputElement;
-  const value = input.value;
-
-  // 全角数字 → 半角数字に変換
-  const converted = value.replace(/[０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
-
-  // 数値化してemit
-  const numeric = parseInt(converted.replace(/,/g, ''), 10) || 0;
-  emit('update:modelValue', numeric);
 }
 </script>
