@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using ShuppiApi.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ① CORS をサービスに追加
@@ -15,6 +18,12 @@ builder.Services.AddCors(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+// DbContext をサービスに追加
+builder.Services.AddDbContext<ExpenseContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// コントローラーを有効化
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -30,6 +39,8 @@ if (app.Environment.IsDevelopment())
 // ③ CORS を有効化（UseRoutingの後、UseAuthorizationの前が基本）
 app.UseHttpsRedirection();
 app.UseCors();
+
+app.MapControllers(); 
 
 var summaries = new[]
 {
