@@ -1,6 +1,6 @@
 <template>
   <q-field
-    :label="label"
+    v-bind="labelAttrs"
     filled
   >
     <template v-slot:control="{ id }">
@@ -14,19 +14,23 @@
           class="q-field__input text-right col-grow"
           inputmode="numeric"
         />
-        <span class="q-ml-sm">円</span>
+        <span class="q-ml-sm">えん</span>
       </div>
     </template>
   </q-field>
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref } from 'vue';
+import { defineProps, defineEmits, watch, ref, computed } from 'vue';
 
 const props = defineProps<{
   modelValue: number | null;
-  label: string;
+  label?: string;
 }>();
+
+const labelAttrs = computed(() => {
+  return props.label ? { label: props.label } : {};
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number): void;
@@ -43,7 +47,6 @@ const moneyFormatForDirective = {
   masked: false,
 };
 
-// 外部のmodelValue → inputTextへ反映
 watch(
   () => props.modelValue,
   (val) => {

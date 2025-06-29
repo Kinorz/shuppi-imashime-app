@@ -1,7 +1,7 @@
 <template>
   <q-input
     v-model="formatted"
-    :label="label"
+    v-bind="labelAttrs"
     readonly
     filled
     class="hide-indicator q-mb-md"
@@ -30,8 +30,12 @@ import { ref, watch, computed } from 'vue';
 
 const props = defineProps<{
   modelValue: string;
-  label: string;
+  label?: string;
 }>();
+
+const labelAttrs = computed(() => {
+  return props.label ? { label: props.label } : {};
+});
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void;
@@ -52,7 +56,7 @@ const formatted = computed(() => {
   if (isNaN(date.getTime())) return '';
   const days = ['日', '月', '火', '水', '木', '金', '土'];
   const weekday = days[date.getDay()];
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${weekday})`;
+  return `${date.getFullYear()}年 ${date.getMonth() + 1}月 ${date.getDate()}日 (${weekday})`;
 });
 
 function onDateSelected(val: string) {
