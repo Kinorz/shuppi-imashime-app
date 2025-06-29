@@ -8,9 +8,10 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:9000") // Quasar Devサーバ
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .SetIsOriginAllowed(origin => true) // デバッグ用にすべてのOriginを許可
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 

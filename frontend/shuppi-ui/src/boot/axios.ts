@@ -15,8 +15,11 @@ declare module 'vue' {
 // "export default () => {}" function below (which runs individually
 // for each client)
 // const api = axios.create({ baseURL: 'https://api.example.com' });
+
+const hostname = window.location.hostname;
+
 const api = axios.create({
-  baseURL: 'http://localhost:5075',
+  baseURL: `http://${hostname}:5075/api`,
 });
 
 export default defineBoot(({ app }) => {

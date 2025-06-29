@@ -1,0 +1,12 @@
+# Dockerfile.dev の中
+FROM node:24
+
+WORKDIR /app
+
+COPY . .
+
+ENV ROLLUP_NO_NATIVE=true
+
+RUN rm -rf node_modules package-lock.json && npm install
+
+CMD ["npm", "run", "dev"]

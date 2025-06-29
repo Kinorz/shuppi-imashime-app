@@ -48,9 +48,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useQuasar } from 'quasar';
 import MoneyInput from '../components/forms/MoneyInput.vue';
 import DateInput from '../components/forms/DateInput.vue';
+import { api } from 'src/boot/axios';
 type CategoryOption = { label: string; value: number };
+const $q = useQuasar();
 
 const mainCategories: CategoryOption[] = [
   { label: '食費', value: 0 },
@@ -84,7 +87,21 @@ const selectedSubCategory = ref<CategoryOption | null>(null);
 const amount = ref<number | null>(null);
 const memo = ref<string>('');
 
-function submitExpense() {
+async function submitExpense() {
+  if (
+    !selectedDate.value ||
+    !selectedMainCategory.value ||
+    !selectedSubCategory.value ||
+    !amount.value
+  ) {
+    $q.notify({
+      type: 'negative',
+      message: 'すべての必須項目を入力してください。',
+    });
+
+    return;
+  }
+
   console.log({
     selectedDate: selectedDate,
     selectedMainCategory: selectedMainCategory.value,
@@ -92,6 +109,32 @@ function submitExpense() {
     amount: amount.value,
     memo: memo.value,
   });
+
+  try {
+    const payload = {
+      date: selectedDate.value,
+      mainCategory: selectedMainCategory.value?.value,
+      subCategory: selectedSubCategory.value?.value,
+      amount: amount.value,
+      memo: memo.value,
+    };
+
+    await api.post('/expenses', payload);
+
+    // 成功したら通知やフォームリセットも検討
+    console.log('登録成功');
+
+    $q.notify({
+      type: 'positive',
+      message: '登録しました',
+    });
+  } catch (error) {
+    console.error('登録失敗:', error);
+    $q.notify({
+      type: 'negative',
+      message: '登録に失敗しました',
+    });
+  }
 }
 
 const currentSubCategories = computed(() => {
