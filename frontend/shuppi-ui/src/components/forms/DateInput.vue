@@ -3,17 +3,11 @@
     v-model="formatted"
     v-bind="labelAttrs"
     readonly
-    filled
-    class="hide-indicator q-mb-md"
+    dense
+    class="hide-indicator text-h6"
+    input-class="text-center cursor-pointer"
     @click="showPicker = true"
   >
-    <template v-slot:append>
-      <q-icon
-        name="event"
-        class="cursor-pointer"
-        @click="showPicker = true"
-      />
-    </template>
   </q-input>
 
   <q-dialog v-model="showPicker">
@@ -56,7 +50,7 @@ const formatted = computed(() => {
   if (isNaN(date.getTime())) return '';
   const days = ['日', '月', '火', '水', '木', '金', '土'];
   const weekday = days[date.getDay()];
-  return `${date.getFullYear()}年 ${date.getMonth() + 1}月 ${date.getDate()}日 (${weekday})`;
+  return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} (${weekday})`;
 });
 
 function onDateSelected(val: string) {

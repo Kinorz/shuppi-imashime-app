@@ -1,20 +1,20 @@
 <template>
   <q-field
     v-bind="labelAttrs"
-    filled
+    dense
   >
     <template v-slot:control="{ id }">
-      <div class="row items-center no-wrap full-width">
+      <div class="row no-wrap full-width items-baseline">
         <input
           :id="id"
+          ref="inputRef"
           v-model="inputText"
-          @focus="selectOnFocus"
           @input="handleInput"
           v-money="moneyFormatForDirective"
-          class="q-field__input text-right col-grow"
+          class="q-field__input text-right col-grow text-h4"
+          style="height: auto; line-height: 1.5; padding-top: 8px"
           inputmode="numeric"
         />
-        <span class="q-ml-sm">えん</span>
       </div>
     </template>
   </q-field>
@@ -41,7 +41,7 @@ const inputText = ref('');
 const moneyFormatForDirective = {
   decimal: '.',
   thousands: ',',
-  prefix: '',
+  prefix: '¥',
   suffix: '',
   precision: 0,
   masked: false,
@@ -65,10 +65,12 @@ function handleInput(event: Event) {
   emit('update:modelValue', numeric);
 }
 
-function selectOnFocus(event: FocusEvent) {
-  const target = event.target as HTMLInputElement;
-  setTimeout(() => {
-    target.select();
-  }, 5);
-}
+// 親コンポーネントからfocus()を呼び出し可能にする
+const inputRef = ref<HTMLInputElement | null>(null);
+
+defineExpose({
+  focus: () => {
+    inputRef.value?.focus();
+  },
+});
 </script>

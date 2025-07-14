@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
+    <!-- <q-header elevated>
       <q-toolbar>
         <q-btn
           flat
@@ -32,7 +32,7 @@
         </q-item-label>
 
       </q-list>
-    </q-drawer>
+    </q-drawer> -->
 
     <q-page-container>
       <router-view />
@@ -41,10 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-const leftDrawerOpen = ref(false);
+// import { ref } from 'vue';
+// const leftDrawerOpen = ref(false);
 
-function toggleLeftDrawer () {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+// function toggleLeftDrawer() {
+//   leftDrawerOpen.value = !leftDrawerOpen.value;
+// }
 </script>
