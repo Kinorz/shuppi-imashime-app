@@ -1,31 +1,36 @@
 <!-- src/pages/TopPage.vue -->
 <template>
-  <q-page class="column q-pa-md no-scroll">
-    <div class="row items-center justify-center">
-      <!-- <DateInput v-model="startDate" />
-      <span class="q-mx-sm">-</span>
-      <DateInput v-model="endDate" /> -->
+  <q-page class="column no-scroll">
+    <div class="row items-center justify-center q-pt-md q-py-sm">
       <div class="text-h6"><span>7月</span><span class="q-ml-sm">(+¥145,000)</span></div>
     </div>
+    <!-- <q-separator /> -->
     <div class="col row no-wrap">
       <div
         class="column q-pa-sm"
         :style="leftStyle"
       >
-        <div class="text-center">+¥200,000</div>
+        <!-- <div class="text-center">+¥200,000</div> -->
+        <div class="text-center"></div>
+        <div class="col row">
+          <div class="bg-grey col-11"></div>
+        </div>
       </div>
       <div
         class="column q-pa-sm"
         :style="rightStyle"
       >
-        <div class="text-left">-¥55,000</div>
+        <!-- <div class="text-left">-¥55,000</div> -->
+        <div class="text-left"></div>
         <div class="col row">
-          <div class="bg-red col-3"></div>
+          <div class="bg-grey col-3"></div>
           <div class="col-9 column">
             <q-list class="">
               <q-slide-item
+                v-for="category in categoryStore.categories"
+                :key="category.id"
                 @right="onRight"
-                @click="goToForm"
+                @click="goToForm(category.id)"
                 v-ripple
               >
                 <template v-slot:right>
@@ -34,124 +39,14 @@
                 <q-item class="">
                   <q-item-section avatar>
                     <q-avatar
-                      color="primary"
+                      :style="{ backgroundColor: category.color, color: 'white' }"
                       text-color="white"
-                      icon="restaurant"
+                      :icon="category.icon"
                     />
                   </q-item-section>
                   <q-item-section>
-                    <div class="text-">食費</div>
+                    <div class="text-">{{ category.name }}</div>
                     <div class="text-right">¥15,000</div>
-                  </q-item-section>
-                </q-item>
-              </q-slide-item>
-              <q-separator inset="item" />
-              <q-slide-item
-                @left="onLeft"
-                @right="onRight"
-              >
-                <template v-slot:right>
-                  <q-icon name="history" />
-                </template>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      icon="sym_o_cleaning"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <div>日用品</div>
-                    <div class="text-right">¥15,000</div>
-                  </q-item-section>
-                </q-item>
-              </q-slide-item>
-              <q-separator inset="item" />
-              <q-slide-item
-                @left="onLeft"
-                @right="onRight"
-              >
-                <template v-slot:right>
-                  <q-icon name="history" />
-                </template>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      icon="sym_o_apparel"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <div>衣類・美容</div>
-                    <div class="text-right">¥15,000</div>
-                  </q-item-section>
-                </q-item>
-              </q-slide-item>
-              <q-separator inset="item" />
-              <q-slide-item
-                @left="onLeft"
-                @right="onRight"
-              >
-                <template v-slot:right>
-                  <q-icon name="history" />
-                </template>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      icon="star"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <div>娯楽費</div>
-                    <div class="text-right">¥15,000</div>
-                  </q-item-section>
-                </q-item>
-              </q-slide-item>
-              <q-separator inset="item" />
-              <q-slide-item
-                @left="onLeft"
-                @right="onRight"
-              >
-                <template v-slot:right>
-                  <q-icon name="history" />
-                </template>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      icon="house"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <div>固定費</div>
-                    <div class="text-right">¥15,000</div>
-                  </q-item-section>
-                </q-item>
-              </q-slide-item>
-              <q-separator inset="item" />
-              <q-slide-item
-                @left="onLeft"
-                @right="onRight"
-              >
-                <template v-slot:right>
-                  <q-icon name="history" />
-                </template>
-                <q-item>
-                  <q-item-section avatar>
-                    <q-avatar
-                      color="primary"
-                      text-color="white"
-                      icon="more_horiz"
-                    />
-                  </q-item-section>
-                  <q-item-section>
-                    <div>その他</div>
-                    <div class="text-right">¥10,000,000</div>
                   </q-item-section>
                 </q-item>
               </q-slide-item>
@@ -183,15 +78,24 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
+import { useCategoryStore } from 'stores/categoryStore';
 
 const layoutMode = ref<'even' | 'left-wide' | 'right-wide'>('right-wide');
 const router = useRouter();
 
+// カテゴリ
+const categoryStore = useCategoryStore();
+
 // 記録ページへ遷移
-function goToForm() {
-  router.push('/expenses/new').catch((err) => {
-    console.error('Navigation failed:', err);
-  });
+function goToForm(categoryId: number) {
+  router
+    .push({
+      path: '/compose/expense',
+      query: { categoryId: categoryId.toString() },
+    })
+    .catch((err) => {
+      console.error('Navigation failed:', err);
+    });
 }
 
 // 左右幅の比率
@@ -234,10 +138,6 @@ function finalize(reset: () => void) {
 onBeforeUnmount(() => {
   clearTimeout(timer);
 });
-
-function onLeft({ reset }: { reset: () => void }) {
-  finalize(reset);
-}
 
 function onRight({ reset }: { reset: () => void }) {
   finalize(reset);
