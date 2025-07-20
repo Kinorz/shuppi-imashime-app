@@ -49,7 +49,7 @@ import { computed, nextTick, onMounted, ref } from 'vue';
 import MoneyInput from '../components/forms/MoneyInput.vue';
 import DateInput from '../components/forms/DateInput.vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useCategoryStore } from 'stores/categoryStore';
+import { useCategoryStore } from 'src/stores/useCategoryStore';
 // import { api } from 'src/boot/axios';
 
 const route = useRoute();

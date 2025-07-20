@@ -4,7 +4,6 @@
     <div class="row items-center justify-center q-pt-md q-py-sm">
       <div class="text-h6"><span>7月</span><span class="q-ml-sm">(+¥145,000)</span></div>
     </div>
-    <!-- <q-separator /> -->
     <div class="col row no-wrap">
       <div
         class="column q-pa-sm"
@@ -78,7 +77,7 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCategoryStore } from 'stores/categoryStore';
+import { useCategoryStore } from 'src/stores/useCategoryStore';
 
 const layoutMode = ref<'even' | 'left-wide' | 'right-wide'>('right-wide');
 const router = useRouter();

@@ -1,41 +1,41 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ShuppiApi.Data;
-using ShuppiApi.Models;
+// using Microsoft.AspNetCore.Mvc;
+// using Microsoft.EntityFrameworkCore;
+// using ShuppiApi.Data;
+// using ShuppiApi.Models;
 
-namespace ShuppiApi.Controllers;
+// namespace ShuppiApi.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ExpensesController : ControllerBase
-{
-    private readonly ExpenseContext _context;
+// [ApiController]
+// [Route("api/[controller]")]
+// public class ExpensesController : ControllerBase
+// {
+//     private readonly ExpenseContext _context;
 
-    public ExpensesController(ExpenseContext context)
-    {
-        _context = context;
-    }
+//     public ExpensesController(ExpenseContext context)
+//     {
+//         _context = context;
+//     }
 
-    // GET: api/expenses
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses()
-    {
-        return await _context.Expenses.ToListAsync();
-    }
+//     // GET: api/expenses
+//     [HttpGet]
+//     public async Task<ActionResult<IEnumerable<Expense>>> GetExpenses()
+//     {
+//         return await _context.Expenses.ToListAsync();
+//     }
 
-    // POST: api/expenses
-    [HttpPost]
-    public async Task<ActionResult<Expense>> PostExpense(Expense expense)
-    {
-        // UTC変換
-        if (expense.Date.Kind == DateTimeKind.Unspecified)
-        {
-            expense.Date = DateTime.SpecifyKind(expense.Date, DateTimeKind.Utc);
-        }
+//     // POST: api/expenses
+//     [HttpPost]
+//     public async Task<ActionResult<Expense>> PostExpense(Expense expense)
+//     {
+//         // UTC変換
+//         if (expense.Date.Kind == DateTimeKind.Unspecified)
+//         {
+//             expense.Date = DateTime.SpecifyKind(expense.Date, DateTimeKind.Utc);
+//         }
 
-        _context.Expenses.Add(expense);
-        await _context.SaveChangesAsync();
+//         _context.Expenses.Add(expense);
+//         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetExpenses), new { id = expense.Id }, expense);
-    }
-}
+//         return CreatedAtAction(nameof(GetExpenses), new { id = expense.Id }, expense);
+//     }
+// }
