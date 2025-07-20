@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, watch, ref, computed } from 'vue';
+import { defineProps, defineEmits, ref, computed } from 'vue';
 
 const props = defineProps<{
   modelValue: number | null;
@@ -46,14 +46,6 @@ const moneyFormatForDirective = {
   precision: 0,
   masked: false,
 };
-
-watch(
-  () => props.modelValue,
-  (val) => {
-    inputText.value = val !== null ? val.toLocaleString() : '';
-  },
-  { immediate: true },
-);
 
 function handleInput(event: Event) {
   const input = event.target as HTMLInputElement;

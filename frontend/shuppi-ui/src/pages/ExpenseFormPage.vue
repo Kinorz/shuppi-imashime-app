@@ -1,20 +1,28 @@
 <template>
   <q-page class="q-pa-md">
-    <q-bar class="bg-white q-pt-md">
-      <!-- <q-space /> -->
-      <q-btn
-        dense
-        flat
-        icon="arrow_back"
-        size="md"
-        @click="goToTop"
-      />
-    </q-bar>
+    <q-header :style="{ backgroundColor: category?.color, color: 'white' }">
+      <q-toolbar>
+        <q-btn
+          dense
+          flat
+          icon="arrow_back"
+          size="md"
+          @click="goToTop"
+        />
+        <q-icon
+          :name="category?.icon"
+          size="md"
+        ></q-icon>
+        <q-toolbar-title>{{ category?.name }}</q-toolbar-title>
+      </q-toolbar>
+      <q-separator />
+    </q-header>
+
     <q-form class="q-px-md">
       <div class="row justify-center">
         <DateInput v-model="selectedDate" />
       </div>
-      <div class="row justify-cente">
+      <div class="row justify-center">
         <q-space />
         <MoneyInput
           ref="moneyInputRef"
@@ -28,7 +36,7 @@
         <q-btn
           label="記録する"
           type="submit"
-          color="primary"
+          :style="{ backgroundColor: category?.color, color: 'white' }"
         />
       </div>
     </q-form>
@@ -36,17 +44,37 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 // import { Notify, useQuasar } from 'quasar';
 import MoneyInput from '../components/forms/MoneyInput.vue';
 import DateInput from '../components/forms/DateInput.vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { useCategoryStore } from 'src/stores/useCategoryStore';
 // import { api } from 'src/boot/axios';
 
+const route = useRoute();
 const router = useRouter();
+const selectedCategoryId = ref<number | null>(null);
+const categoryStore = useCategoryStore();
 const selectedDate = ref('');
 const amount = ref<number | null>(null);
 const moneyInputRef = ref<{ focus: () => void } | null>(null);
+
+// 初期表示
+onMounted(() => {
+  const id = route.query.categoryId;
+  selectedCategoryId.value = id ? parseInt(id as string, 10) : null;
+  void nextTick(() => {
+    void nextTick(() => {
+      moneyInputRef.value?.focus();
+    });
+  });
+});
+
+// カテゴリを取得する計算プロパティ
+const category = computed(() => {
+  return categoryStore.categories.find((c) => c.id === selectedCategoryId.value);
+});
 
 // トップページへ遷移
 function goToTop() {
