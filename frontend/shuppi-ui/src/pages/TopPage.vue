@@ -55,7 +55,7 @@
       </div>
     </div>
 
-    <div class="q-mt-md">
+    <!-- <div class="q-mt-md">
       <q-btn
         label="左を広く"
         @click="setLayout('left-wide')"
@@ -70,7 +70,7 @@
         @click="setLayout('even')"
         class="q-ml-sm"
       />
-    </div>
+    </div> -->
   </q-page>
 </template>
 
@@ -119,9 +119,9 @@ const rightStyle = computed(() => ({
   transition: 'flex-basis 0.3s ease',
 }));
 
-const setLayout = (mode: typeof layoutMode.value) => {
-  layoutMode.value = mode;
-};
+// const setLayout = (mode: typeof layoutMode.value) => {
+//   layoutMode.value = mode;
+// };
 
 // スライドで履歴表示
 let timer: ReturnType<typeof setTimeout>;
