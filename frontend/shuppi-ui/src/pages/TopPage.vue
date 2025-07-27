@@ -81,8 +81,6 @@ import { useCategoryStore } from 'src/stores/useCategoryStore';
 
 const layoutMode = ref<'even' | 'left-wide' | 'right-wide'>('right-wide');
 const router = useRouter();
-
-// カテゴリ
 const categoryStore = useCategoryStore();
 
 // 記録ページへ遷移

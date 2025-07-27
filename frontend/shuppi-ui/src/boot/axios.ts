@@ -1,5 +1,6 @@
 import { defineBoot } from '#q-app/wrappers';
 import axios, { type AxiosInstance } from 'axios';
+import { useAuthStore } from 'src/stores/useAuthStore';
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -23,6 +24,15 @@ const api = axios.create({
 });
 
 export default defineBoot(({ app }) => {
+  const auth = useAuthStore();
+
+  api.interceptors.request.use((config) => {
+    if (auth.token) {
+      config.headers.Authorization = `Bearer ${auth.token}`;
+    }
+    return config;
+  });
+
   // for use inside Vue files (Options API) through this.$axios and this.$api
 
   app.config.globalProperties.$axios = axios;
