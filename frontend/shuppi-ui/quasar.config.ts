@@ -36,9 +36,11 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#build
     build: {
       target: {
-        browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        // browser: ['es2022', 'firefox115', 'chrome115', 'safari14'],
+        browser: ['es2019', 'chrome64', 'safari12'],
         node: 'node20',
       },
+      polyfillModulePreload: false,
 
       typescript: {
         strict: true,
@@ -63,9 +65,17 @@ export default defineConfig((/* ctx */) => {
       // distDir
 
       // extendViteConf (viteConf) {},
-      // viteVuePluginOptions: {},
 
+      // viteVuePluginOptions: {},
       vitePlugins: [
+        [
+          '@vitejs/plugin-legacy',
+          {
+            targets: ['defaults', 'not IE 11', 'safari >= 12'],
+            modernPolyfills: false,
+            additionalLegacyPolyfills: ['core-js/stable', 'regenerator-runtime/runtime'],
+          },
+        ],
         [
           'vite-plugin-checker',
           {

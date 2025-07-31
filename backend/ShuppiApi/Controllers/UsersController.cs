@@ -4,6 +4,7 @@ using ShuppiApi.Data;
 using ShuppiApi.Models;
 using ShuppiApi.Dtos;
 using BCrypt.Net;
+using ShuppiApi.Services;
 
 namespace ShuppiApi.Controllers;
 
@@ -12,10 +13,12 @@ namespace ShuppiApi.Controllers;
 public class UsersController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly TokenService _tokenService;
 
-    public UsersController(AppDbContext context)
+    public UsersController(AppDbContext context, TokenService tokenService)
     {
         _context = context;
+        _tokenService = tokenService;
     }
 
     [HttpPost("register")]
@@ -37,4 +40,18 @@ public class UsersController : ControllerBase
 
         return Ok(new { message = "登録に成功しました。" });
     }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login(UserLoginDto dto)
+    {
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        {
+            return Unauthorized("メールアドレスまたはパスワードが正しくありません。");
+        }
+
+        var token = _tokenService.GenerateToken(user);
+        return Ok(new { token });
+    }
+
 }
