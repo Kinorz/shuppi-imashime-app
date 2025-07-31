@@ -18,7 +18,10 @@
       <q-separator />
     </q-header>
 
-    <q-form class="q-px-md">
+    <q-form
+      class="q-px-md"
+      @submit.prevent="submitExpense"
+    >
       <div class="row justify-center">
         <DateInput v-model="selectedDate" />
       </div>
@@ -57,7 +60,7 @@ const router = useRouter();
 const selectedCategoryId = ref<number | null>(null);
 const categoryStore = useCategoryStore();
 const selectedDate = ref('');
-const amount = ref<number | null>(null);
+const amount = ref<number>(0);
 const moneyInputRef = ref<{ focus: () => void } | null>(null);
 
 // 初期表示
@@ -85,4 +88,27 @@ function goToTop() {
 
 const today = new Date().toISOString().slice(0, 10); // e.g. "2025-06-29"
 selectedDate.value = today;
+
+// async function submitExpense() {
+function submitExpense() {
+  if (!selectedCategoryId.value || !selectedDate.value || amount.value == null) {
+    console.warn('未入力項目があります');
+    return;
+  }
+
+  const expenseData = {
+    categoryId: selectedCategoryId.value,
+    date: selectedDate.value,
+    amount: amount.value,
+    tags: [], // 今後追加予定
+  };
+
+  try {
+    // await api.post('/expenses', expenseData);
+    console.log('登録内容', expenseData);
+    goToTop();
+  } catch (error) {
+    console.error('登録に失敗しました', error);
+  }
+}
 </script>
