@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { useCategoryStore } from 'src/stores/useCategoryStore';
+import { useCategoryStore } from 'src/stores/CategoryStore';
 
 const categoryStore = useCategoryStore();
 

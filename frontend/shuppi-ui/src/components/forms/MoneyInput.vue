@@ -21,6 +21,7 @@
 </template>
 
 <script setup lang="ts">
+import { unformat } from 'v-money3';
 import { defineProps, defineEmits, ref, computed } from 'vue';
 
 const props = defineProps<{
@@ -49,12 +50,14 @@ const moneyFormatForDirective = {
 
 function handleInput(event: Event) {
   const input = event.target as HTMLInputElement;
-  const value = input.value;
+  const raw = input.value;
 
-  // カンマを除去して数値に変換
-  const numeric = parseInt(value.replace(/,/g, ''), 10) || 0;
+  const unmasked = unformat(raw, moneyFormatForDirective);
+  const numeric = Number(unmasked);
 
-  emit('update:modelValue', numeric);
+  if (!isNaN(numeric)) {
+    emit('update:modelValue', numeric);
+  }
 }
 
 // 親コンポーネントからfocus()を呼び出し可能にする

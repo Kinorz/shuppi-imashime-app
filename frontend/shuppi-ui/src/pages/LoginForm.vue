@@ -34,7 +34,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { api } from 'boot/axios';
-import { useAuthStore } from 'src/stores/useAuthStore';
+import { useAuthStore } from 'src/stores/AuthStore';
 
 const email = ref('');
 const password = ref('');

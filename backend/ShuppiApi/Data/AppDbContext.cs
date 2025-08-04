@@ -12,8 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<Expense> Expenses { get; set; }
     public DbSet<Tag> Tags { get; set; }
     public DbSet<ExpenseTag> ExpenseTags { get; set; }
-    public DbSet<TagConcept> TagConcepts { get; set; }
     public DbSet<Category> Categories { get; set; }
+    public DbSet<TagCategory> TagCategories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +32,19 @@ public class AppDbContext : DbContext
             .HasOne(et => et.Tag)
             .WithMany(t => t.ExpenseTags)
             .HasForeignKey(et => et.TagId);
+
+        modelBuilder.Entity<TagCategory>()
+            .HasKey(tc => new { tc.TagId, tc.CategoryId });
+
+        modelBuilder.Entity<TagCategory>()
+            .HasOne(tc => tc.Tag)
+            .WithMany(t => t.TagCategories)
+            .HasForeignKey(tc => tc.TagId);
+
+        modelBuilder.Entity<TagCategory>()
+            .HasOne(tc => tc.Category)
+            .WithMany(c => c.TagCategories)
+            .HasForeignKey(tc => tc.CategoryId);
 
         modelBuilder.Entity<Category>().HasData(
             new Category { Id = 1, Name = "食費", Color = "#f28b82", Icon = "sym_o_restaurant" },

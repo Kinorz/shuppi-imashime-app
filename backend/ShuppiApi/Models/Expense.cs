@@ -23,5 +23,7 @@ public class Expense
 
     public User User { get; set; } = null!;
 
+    public string? Note { get; set; }
+
     public ICollection<ExpenseTag> ExpenseTags { get; set; } = new List<ExpenseTag>();
 }

@@ -20,4 +20,5 @@ public class Category
   public string Icon { get; set; } = "sym_o_category";
 
   public ICollection<Expense> Expenses { get; set; } = new List<Expense>();
+  public ICollection<TagCategory> TagCategories { get; set; } = new List<TagCategory>();
 }
