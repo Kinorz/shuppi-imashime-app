@@ -77,7 +77,7 @@
 <script setup lang="ts">
 import { ref, computed, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCategoryStore } from 'src/stores/useCategoryStore';
+import { useCategoryStore } from 'src/stores/CategoryStore';
 
 const layoutMode = ref<'even' | 'left-wide' | 'right-wide'>('right-wide');
 const router = useRouter();

@@ -30,7 +30,8 @@ services:
     volumes:
       - ./backend/ShuppiApi:/app
     working_dir: /app
-    command: dotnet run --urls http://0.0.0.0:5075
+    command: tail -f /dev/null
+    # command: dotnet run --urls http://0.0.0.0:5075
     depends_on:
       - db
 

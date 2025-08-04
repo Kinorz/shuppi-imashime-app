@@ -17,9 +17,8 @@ public class Tag
 
   public User User { get; set; } = null!;
 
-  public int? ConceptId { get; set; }
-
-  public TagConcept? Concept { get; set; }
+  public bool IsHidden { get; set; } = false;
 
   public ICollection<ExpenseTag> ExpenseTags { get; set; } = new List<ExpenseTag>();
+  public ICollection<TagCategory> TagCategories { get; set; } = new List<TagCategory>();
 }

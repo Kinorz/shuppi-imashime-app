@@ -62,8 +62,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// CORS を有効化
 app.UseHttpsRedirection();
+
+// CORS を有効化
 app.UseCors();
 
 app.UseAuthentication();   // 認証
