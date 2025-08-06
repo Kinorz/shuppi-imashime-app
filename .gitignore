@@ -1,3 +1,5 @@
+.env
+
 # Node.js（Quasar）
 frontend/shuppi-ui/node_modules/
 frontend/shuppi-ui/.quasar/
@@ -12,4 +14,3 @@ backend/ShuppiApi/obj/
 .DS_Store
 *.swp
 .vscode/
-

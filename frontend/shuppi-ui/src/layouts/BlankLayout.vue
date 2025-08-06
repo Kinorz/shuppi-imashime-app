@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <!-- <q-header class="bg-white text-black">
+    <!-- <q-header elevated>
       <q-toolbar>
         <q-btn
           flat
@@ -10,45 +10,33 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
         />
-        <q-toolbar-title></q-toolbar-title>
-      </q-toolbar>
-      <q-separator />
-    </q-header> -->
 
-    <!-- <q-drawer
+        <q-toolbar-title>
+          Quasar App
+        </q-toolbar-title>
+
+        <div>Quasar v{{ $q.version }}</div>
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer
       v-model="leftDrawerOpen"
       show-if-above
       bordered
     >
       <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+        <q-item-label
+          header
+        >
+          Essential Links
+        </q-item-label>
+
       </q-list>
     </q-drawer> -->
 
     <q-page-container>
       <router-view />
     </q-page-container>
-
-    <q-footer class="bg-grey-2 text-black">
-      <q-tabs
-        align="justify"
-        active-color="primary"
-        dense
-        class="text-grey-8"
-        no-caps
-      >
-        <q-route-tab
-          to="/"
-          label="ホーム"
-          icon="home"
-        />
-        <q-route-tab
-          to="/settings"
-          label="設定"
-          icon="settings"
-        />
-      </q-tabs>
-    </q-footer>
   </q-layout>
 </template>
 
