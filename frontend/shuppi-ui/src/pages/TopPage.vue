@@ -2,8 +2,24 @@
 <template>
   <q-page class="column no-scroll">
     <div class="row items-center justify-center q-pt-md q-py-sm">
-      <div class="text-h6"><span>7月</span><span class="q-ml-sm">(+¥145,000)</span></div>
+      <q-btn
+        dense
+        flat
+        icon="chevron_left"
+        @click="moveMonth(-1)"
+      />
+      <div class="text-h6 q-mx-sm">
+        {{ year }}年 {{ month }}月
+        <span class="q-ml-sm">(¥{{ totalAmount.toLocaleString() }})</span>
+      </div>
+      <q-btn
+        dense
+        flat
+        icon="chevron_right"
+        @click="moveMonth(1)"
+      />
     </div>
+
     <div class="col row no-wrap">
       <div
         class="column q-pa-sm"
@@ -45,7 +61,9 @@
                   </q-item-section>
                   <q-item-section>
                     <div class="text-">{{ category.name }}</div>
-                    <div class="text-right">¥15,000</div>
+                    <div class="text-right">
+                      ¥{{ (categorySummaryMap[category.id] ?? 0).toLocaleString() }}
+                    </div>
                   </q-item-section>
                 </q-item>
               </q-slide-item>
@@ -75,9 +93,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onBeforeUnmount } from 'vue';
+import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from 'src/stores/CategoryStore';
+import { api } from 'boot/axios';
+
+const totalAmount = ref(0);
+const categorySummaryMap = ref<Record<number, number>>({});
+const now = new Date();
+const year = ref(now.getFullYear());
+const month = ref(now.getMonth() + 1);
+
+interface CategorySummary {
+  categoryId: number;
+  amount: number;
+}
+
+async function moveMonth(delta: number) {
+  const newDate = new Date(year.value, month.value - 1 + delta);
+  year.value = newDate.getFullYear();
+  month.value = newDate.getMonth() + 1;
+  await fetchData();
+}
+
+async function fetchData() {
+  try {
+    const res = await api.get('/dashboard/monthly-summary', {
+      params: { year: year.value, month: month.value },
+    });
+    totalAmount.value = res.data.totalAmount;
+    categorySummaryMap.value = Object.fromEntries(
+      res.data.categorySummaries.map((c: CategorySummary) => [c.categoryId, c.amount]),
+    );
+  } catch (err) {
+    console.error('取得失敗', err);
+  }
+}
+
+onMounted(async () => {
+  await fetchData();
+});
 
 const layoutMode = ref<'even' | 'left-wide' | 'right-wide'>('right-wide');
 const router = useRouter();
