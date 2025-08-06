@@ -77,6 +77,32 @@ public class ExpenseController : ControllerBase
         TagId = tag.Id
     }).ToList();
 
+    // タグとカテゴリの関係を追加
+    // 既存のタグIDを取得
+    var tagIds = allTags.Select(t => t.Id).ToList();
+
+    // 既存のタグとカテゴリの関係を取得
+    var existingTagCategories = await _context.TagCategories
+        .Where(tc => tagIds.Contains(tc.TagId) && tc.CategoryId == dto.CategoryId)
+        .Select(tc => new { tc.TagId, tc.CategoryId })
+        .ToListAsync();
+    var existingPairs = existingTagCategories
+        .Select(tc => (tc.TagId, tc.CategoryId))
+        .ToHashSet();
+    
+    // 新規のタグとカテゴリの関係を作成
+    var newTagCategories = allTags
+        .Where(tag => !existingPairs.Contains((tag.Id, dto.CategoryId)))
+        .Select(tag => new TagCategory
+        {
+            TagId = tag.Id,
+            CategoryId = dto.CategoryId
+        })
+        .ToList();
+
+    // 新規のタグとカテゴリの関係をDBに追加
+    _context.TagCategories.AddRange(newTagCategories);
+    // 支出をDBに追加
     _context.Expenses.Add(expense);
     await _context.SaveChangesAsync();
 
