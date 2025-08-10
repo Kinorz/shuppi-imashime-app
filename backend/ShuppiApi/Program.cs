@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ShuppiApi.Data;
 using ShuppiApi.Services;
+using System.Diagnostics;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +76,22 @@ var app = builder.Build();
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
+
+// ★ perf: 全リクエストの総処理時間を記録
+app.Use(async (ctx, next) =>
+{
+    var sw = Stopwatch.StartNew();
+    await next();
+    ctx.Response.OnCompleted(() =>
+    {
+        var log = ctx.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger("Perf");
+        log.LogInformation(
+            "req {Method} {Path} status={Status} total={Total}ms trace={TraceId}",
+            ctx.Request.Method, ctx.Request.Path, ctx.Response.StatusCode,
+            sw.ElapsedMilliseconds, ctx.TraceIdentifier);
+        return Task.CompletedTask;
+    });
 });
 
 // DevだけSwaggerとHTTPSリダイレクト
