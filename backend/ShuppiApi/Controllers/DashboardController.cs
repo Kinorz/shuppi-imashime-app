@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
@@ -13,32 +14,42 @@ namespace ShuppiApi.Controllers;
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ILogger<DashboardController> _log;
 
-    public DashboardController(AppDbContext context)
+    public DashboardController(AppDbContext context, ILogger<DashboardController> log)
     {
         _context = context;
+        _log = log;
     }
 
     [HttpGet("monthly-summary")]
     public async Task<IActionResult> GetMonthlySummary([FromQuery] int? year, [FromQuery] int? month)
     {
+        var sw = Stopwatch.StartNew();                 // 計測開始
+        var a = sw.ElapsedMilliseconds;               // (a) コントローラ到達
+
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(userIdStr, out var userId))
             return BadRequest("Invalid user ID.");
 
         var now = DateTime.UtcNow;
 
-        // 年月が指定されていなければ現在の年月を使用
         var targetYear = year ?? now.Year;
         var targetMonth = month ?? now.Month;
 
         var startOfMonth = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
         var startOfNextMonth = startOfMonth.AddMonths(1);
 
+        var b = sw.ElapsedMilliseconds;               // (b) DB前
+
         var expenses = await _context.Expenses
+            .AsNoTracking()
             .Where(e => e.UserId == userId && e.Date >= startOfMonth && e.Date < startOfNextMonth)
             .Include(e => e.Category)
             .ToListAsync();
+
+        var c = sw.ElapsedMilliseconds;               // (c) DB後
+        var dbMs = c - b;
 
         var totalAmount = expenses.Sum(e => e.Amount);
 
@@ -52,10 +63,19 @@ public class DashboardController : ControllerBase
             })
             .ToList();
 
-        return Ok(new
+        var result = Ok(new
         {
             totalAmount,
             categorySummaries
         });
+
+        var d = sw.ElapsedMilliseconds;               // (d) 応答直前
+        var total = sw.ElapsedMilliseconds;
+
+        _log.LogInformation(
+            "perf dashboard/monthly-summary user={UserId} y={Year} m={Month} a={A}ms b={B}ms c={C}ms d={D}ms dbMs={DbMs}ms total={Total}ms",
+            userId, targetYear, targetMonth, a, b, c, d, dbMs, total);
+
+        return result;
     }
 }
