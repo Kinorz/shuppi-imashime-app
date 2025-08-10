@@ -1,4 +1,5 @@
 .env
+.env.production
 
 # Node.js（Quasar）
 frontend/shuppi-ui/node_modules/

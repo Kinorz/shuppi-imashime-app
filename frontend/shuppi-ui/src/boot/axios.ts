@@ -20,7 +20,7 @@ declare module 'vue' {
 const hostname = window.location.hostname;
 
 const api = axios.create({
-  baseURL: `http://${hostname}:5075/api`,
+  baseURL: import.meta.env.PROD ? import.meta.env.VITE_API_BASE : `http://${hostname}:5075/api`,
 });
 
 export default defineBoot(({ app }) => {

@@ -1,75 +1,100 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using ShuppiApi.Data;
 using ShuppiApi.Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS をサービスに追加
-builder.Services.AddCors(options =>
+// ===== CORS =====
+// ALLOWED_ORIGINS="https://xxx.pages.dev,https://your.domain"
+var origins = (builder.Configuration["ALLOWED_ORIGINS"] ?? "")
+  .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+builder.Services.AddCors(o =>
 {
-    options.AddDefaultPolicy(policy =>
+    if (origins.Length > 0)
     {
-        policy
-            .SetIsOriginAllowed(origin => true) // デバッグ用にすべてのOriginを許可
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
+        o.AddPolicy("pages",
+            p => p.WithOrigins(origins).AllowAnyHeader().AllowAnyMethod());
+    }
+    else
+    {
+        // ローカル開発用（compose時）
+        o.AddPolicy("pages",
+            p => p.SetIsOriginAllowed(_ => true).AllowAnyHeader().AllowAnyMethod());
+    }
 });
 
-// サービス登録
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// ===== DB =====
+string? cs =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("Default")
+    ?? builder.Configuration["ConnectionStrings:DefaultConnection"]
+    ?? builder.Configuration["ConnectionStrings:Default"];
 
-// DbContext をサービスに追加
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (string.IsNullOrWhiteSpace(cs))
+    throw new InvalidOperationException("DB connection string not found.");
 
-builder.Services.AddControllers();
-builder.Services.AddSingleton<TokenService>();
+builder.Services.AddDbContext<AppDbContext>(opt =>
+{
+    opt.UseNpgsql(cs, o => o.CommandTimeout(60));
+});
 
-// 認証の設定を追加
+// ===== AuthN/AuthZ =====
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddJwtBearer(opt =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
+        opt.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            ClockSkew = TimeSpan.Zero,
             ValidIssuer = builder.Configuration["JWT_ISSUER"],
             ValidAudience = builder.Configuration["JWT_AUDIENCE"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET"]!)
-            )
+                Encoding.UTF8.GetBytes(builder.Configuration["JWT_SECRET"]!))
         };
     });
 
-// 認可（Authorize）を使えるように
 builder.Services.AddAuthorization();
+
+// ===== MVC / Swagger =====
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<TokenService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 逆プロキシ(X-Forwarded-*)対応（Render/Cloudflare経由）
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
 
-// 開発環境でのみ Swagger を有効にする
+// DevだけSwaggerとHTTPSリダイレクト
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
+// CORS
+app.UseCors("pages");
 
-// CORS を有効化
-app.UseCors();
+// Auth
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.UseAuthentication();   // 認証
-app.UseAuthorization();    // 認可
+// ヘルスチェック
+app.MapGet("/healthz", () => Results.Ok("ok"));
 
-app.MapControllers(); 
+app.MapControllers();
 
 app.Run();
