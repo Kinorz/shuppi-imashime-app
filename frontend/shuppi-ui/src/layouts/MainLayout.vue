@@ -38,6 +38,11 @@
         no-caps
       >
         <q-route-tab
+          to="/expenses"
+          label="履歴"
+          icon="sym_o_receipt_long"
+        />
+        <q-route-tab
           to="/"
           label="ホーム"
           icon="home"
