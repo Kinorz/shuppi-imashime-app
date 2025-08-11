@@ -11,7 +11,7 @@
       clearable
       label="カテゴリーで絞り込み"
       class="q-mb-md"
-      @update:model-value="reload"
+      @update:model-value="onSelect"
     />
     <q-list
       bordered
@@ -33,6 +33,7 @@
     <q-infinite-scroll
       @load="loadMore"
       :offset="100"
+      :disable="isLoading || !hasMore"
       v-if="hasMore"
     >
       <div class="text-center q-my-md">読み込み中…</div>
@@ -84,8 +85,8 @@ const categoryOptions = computed(() =>
   categoryStore.categories.map((c) => ({ id: c.id, name: c.name })),
 );
 
-const fetchPage = async () => {
-  if (isLoading.value || !hasMore.value) return;
+const fetchPage = async (): Promise<boolean> => {
+  if (isLoading.value || !hasMore.value) return false;
   isLoading.value = true;
   try {
     const { data } = await api.get<PageDto>('expenses', {
@@ -96,48 +97,36 @@ const fetchPage = async () => {
         tagIds: selectedTagIds.value.length ? selectedTagIds.value : undefined,
       },
     });
-
-    const exists = new Set(items.value.map((i) => i.id));
-    const dedup = data.items.filter((i) => !exists.has(i.id));
-
-    items.value.push(...dedup);
+    items.value.push(...data.items);
     hasMore.value = data.hasMore;
+    return data.items.length > 0;
   } finally {
     isLoading.value = false;
   }
 };
 
 const loadMore = async (_: number, done: () => void) => {
-  await fetchPage();
-  page.value++;
+  const ok = await fetchPage();
+  if (ok) page.value++;
   done();
 };
 
-const reload = async () => {
+const onSelect = async (val: number | null) => {
   await router.replace({
     path: '/expenses',
-    query: categoryId.value ? { categoryId: String(categoryId.value) } : {},
+    query: val ? { categoryId: String(val) } : {},
   });
-  items.value = [];
-  page.value = 1;
-  hasMore.value = true;
-  await fetchPage();
-  page.value++;
 };
 
 watch(
   () => route.query.categoryId,
   async (q) => {
     categoryId.value = q ? Number(q) : null;
-    await router.replace({
-      path: '/expenses',
-      query: categoryId.value ? { categoryId: String(categoryId.value) } : {},
-    });
     items.value = [];
     page.value = 1;
     hasMore.value = true;
-    await fetchPage();
-    page.value++;
+    const ok = await fetchPage();
+    if (ok) page.value++;
   },
   { immediate: true },
 );
