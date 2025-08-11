@@ -25,9 +25,6 @@ public class DashboardController : ControllerBase
     [HttpGet("monthly-summary")]
     public async Task<IActionResult> GetMonthlySummary([FromQuery] int? year, [FromQuery] int? month)
     {
-        var sw = Stopwatch.StartNew();                 // 計測開始
-        var a = sw.ElapsedMilliseconds;               // (a) コントローラ到達
-
         var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(userIdStr, out var userId))
             return BadRequest("Invalid user ID.");
@@ -40,16 +37,11 @@ public class DashboardController : ControllerBase
         var startOfMonth = new DateTime(targetYear, targetMonth, 1, 0, 0, 0, DateTimeKind.Utc);
         var startOfNextMonth = startOfMonth.AddMonths(1);
 
-        var b = sw.ElapsedMilliseconds;               // (b) DB前
-
         var expenses = await _context.Expenses
             .AsNoTracking()
             .Where(e => e.UserId == userId && e.Date >= startOfMonth && e.Date < startOfNextMonth)
             .Include(e => e.Category)
             .ToListAsync();
-
-        var c = sw.ElapsedMilliseconds;               // (c) DB後
-        var dbMs = c - b;
 
         var totalAmount = expenses.Sum(e => e.Amount);
 
@@ -68,13 +60,6 @@ public class DashboardController : ControllerBase
             totalAmount,
             categorySummaries
         });
-
-        var d = sw.ElapsedMilliseconds;               // (d) 応答直前
-        var total = sw.ElapsedMilliseconds;
-
-        _log.LogInformation(
-            "perf dashboard/monthly-summary user={UserId} y={Year} m={Month} a={A}ms b={B}ms c={C}ms d={D}ms dbMs={DbMs}ms total={Total}ms",
-            userId, targetYear, targetMonth, a, b, c, d, dbMs, total);
 
         return result;
     }

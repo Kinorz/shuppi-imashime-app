@@ -44,7 +44,7 @@
               <q-slide-item
                 v-for="category in categoryStore.categories"
                 :key="category.id"
-                @right="onRight"
+                @right="onRight(category.id, $event)"
                 @click="goToForm(category.id)"
                 v-ripple
               >
@@ -150,6 +150,13 @@ function goToForm(categoryId: number) {
     });
 }
 
+// 履歴ページへ遷移
+const goHistory = (id?: number) => {
+  router.push({ path: '/expenses', query: id ? { categoryId: String(id) } : {} }).catch((err) => {
+    console.error('Navigation failed:', err);
+  });
+};
+
 // 左右幅の比率
 const leftWidth = computed(() => {
   switch (layoutMode.value) {
@@ -191,7 +198,8 @@ onBeforeUnmount(() => {
   clearTimeout(timer);
 });
 
-function onRight({ reset }: { reset: () => void }) {
+function onRight(categoryId: number, { reset }: { reset: () => void }) {
   finalize(reset);
+  goHistory(categoryId); // ★ 該当カテゴリで履歴へ
 }
 </script>
