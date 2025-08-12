@@ -76,6 +76,7 @@ import { useCategoryStore } from 'src/stores/CategoryStore';
 import { useTagStore } from 'src/stores/TagStore';
 import type { Tag } from 'src/stores/TagStore';
 import { useExpenseApi } from 'src/composables/useExpenseApi';
+import { ymd } from 'src/utils/date';
 
 const route = useRoute();
 const router = useRouter();
@@ -148,8 +149,7 @@ function goToTop() {
   });
 }
 
-const today = new Date().toISOString().slice(0, 10); // e.g. "2025-06-29"
-selectedDate.value = today;
+selectedDate.value = ymd();
 
 async function submitExpense() {
   if (!selectedCategoryId.value || !selectedDate.value || amount.value == null) {

@@ -97,6 +97,7 @@ import { ref, computed, onBeforeUnmount, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCategoryStore } from 'src/stores/CategoryStore';
 import { api } from 'boot/axios';
+import { ymd } from 'src/utils/date';
 
 const totalAmount = ref(0);
 const categorySummaryMap = ref<Record<number, number>>({});
@@ -150,11 +151,23 @@ function goToForm(categoryId: number) {
     });
 }
 
+const monthRange = () => {
+  const first = new Date(year.value, month.value - 1, 1);
+  const last = new Date(year.value, month.value, 0);
+  return { from: ymd(first), to: ymd(last) };
+};
+
 // 履歴ページへ遷移
 const goHistory = (id?: number) => {
-  router.push({ path: '/expenses', query: id ? { categoryId: String(id) } : {} }).catch((err) => {
-    console.error('Navigation failed:', err);
-  });
+  const { from, to } = monthRange();
+  router
+    .push({
+      path: '/expenses',
+      query: { ...(id ? { categoryId: String(id) } : {}), from, to },
+    })
+    .catch((err) => {
+      console.error('Navigation failed:', err);
+    });
 };
 
 // 左右幅の比率

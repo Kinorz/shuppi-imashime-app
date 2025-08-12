@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShuppiApi.Data;
 using ShuppiApi.Models;
+using ShuppiApi.Infrastructure.Time;
 
 namespace ShuppiApi.Controllers;
 
@@ -41,6 +42,9 @@ public class ExpenseController : ControllerBase
         {
             expense.Date = DateTime.SpecifyKind(expense.Date, DateTimeKind.Utc);
         }
+
+        // UTC変換
+        expense.Date = Tz.ToUtc(dto.Date);
 
         // タグ名をユニークに
         var tagNames = dto.Tags.Distinct().ToList();
@@ -124,7 +128,9 @@ public class ExpenseController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         [FromQuery] int? categoryId = null,
-        [FromQuery] List<int>? tagIds = null)
+        [FromQuery] List<int>? tagIds = null,
+        [FromQuery] DateOnly? from = null,
+        [FromQuery] DateOnly? to = null)
     {
         var uid = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!int.TryParse(uid, out var userId)) return BadRequest("Invalid user id.");
@@ -135,11 +141,24 @@ public class ExpenseController : ControllerBase
         if (categoryId is not null)
             q = q.Where(e => e.CategoryId == categoryId);
 
+        if (from is not null)
+        {
+            var fromUtc = Tz.DayStartUtc(from.Value);
+            q = q.Where(e => e.Date >= fromUtc);
+        }
+        if (to is not null)
+        {
+            var toUtcEx = Tz.DayEndExclusiveUtc(to.Value);
+            q = q.Where(e => e.Date < toUtcEx);
+        }
+
         if (tagIds is { Count: > 0 })
         {
             var wanted = tagIds.Distinct().ToList();
             q = q.Where(e => wanted.All(tagId => e.ExpenseTags.Any(et => et.TagId == tagId)));
         }
+
+        var totalAmount = await q.SumAsync(e => (decimal?)e.Amount) ?? 0m;
 
         q = q.OrderByDescending(e => e.Date).ThenByDescending(e => e.Id);
 
@@ -163,8 +182,8 @@ public class ExpenseController : ControllerBase
             Tags = new()
         }).ToList();
 
-        return Ok(new PageDto(items, hasMore));
+        return Ok(new PageDto(items, hasMore, totalAmount));
     }
 
-    public record PageDto(List<ExpenseResponseDto> Items, bool HasMore);
+    public record PageDto(List<ExpenseResponseDto> Items, bool HasMore, decimal TotalAmount);
 }

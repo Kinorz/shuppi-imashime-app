@@ -11,7 +11,7 @@
           v-model="inputText"
           @input="handleInput"
           v-money="moneyFormatForDirective"
-          class="q-field__input text-right col-grow text-h4"
+          class="q-field__input text-right col-grow text-h5"
           style="height: auto; line-height: 1.5; padding-top: 8px"
           inputmode="numeric"
         />
