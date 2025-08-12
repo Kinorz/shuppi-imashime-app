@@ -4,11 +4,26 @@
     v-bind="labelAttrs"
     dense
     filled
-    :clearable="props.isClearable"
+    readonly
     class="hide-indicator"
     input-class="text-center cursor-pointer"
-    @click="showPicker = true"
-  />
+    @click="onFieldClick"
+  >
+    <template
+      #append
+      v-if="props.isClearable && !!internalValue"
+    >
+      <q-icon
+        name="cancel"
+        class="q-field__focusable-action cursor-pointer"
+        role="button"
+        @click.stop="clearDate"
+        @keydown.enter.prevent="clearDate"
+        @keydown.space.prevent="clearDate"
+        tabindex="0"
+      />
+    </template>
+  </q-input>
   <q-dialog v-model="showPicker">
     <q-date
       v-model="internalValue"
@@ -54,13 +69,23 @@ const display = computed<string>({
     return `${date.getFullYear()}/${date.getMonth() + 1}/${date.getDate()} (${days[date.getDay()]})`;
   },
   set(v: string) {
-    // clearボタンで '' が入る → 内部状態と親をクリア
     if (!v) {
       internalValue.value = '';
       emit('update:modelValue', '');
     }
   },
 });
+
+function onFieldClick(e: MouseEvent) {
+  const el = e.target as HTMLElement;
+  if (el.closest('.q-field__focusable-action')) return;
+  showPicker.value = true;
+}
+
+function clearDate() {
+  internalValue.value = '';
+  emit('update:modelValue', '');
+}
 
 function onDateSelected(val: string) {
   internalValue.value = val;
